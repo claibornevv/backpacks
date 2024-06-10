@@ -17,7 +17,5 @@ Current commands:
 
 ---
 
-## Releases
-[PRE-RELEASE](https://github.com/claibornevv/backpacks/releases/pre-release/)
-
-[JAR FILE](JAR/backpacks.jar)
+# Releases
+### [Click here to download](https://github.com/claibornevv/backpacks/releases/download/release/backpacks.jar)
