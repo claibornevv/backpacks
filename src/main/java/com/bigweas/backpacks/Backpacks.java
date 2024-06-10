@@ -2,6 +2,7 @@ package com.bigweas.backpacks;
 
 // Importing classes for registering commands and listeners
 import com.bigweas.backpacks.commands.BackpackCommand;
+import com.bigweas.backpacks.commands.SeebackpackCommand;
 import com.bigweas.backpacks.listeners.BackpackListener;
 
 // Bukkit imports
@@ -23,12 +24,14 @@ public final class Backpacks extends JavaPlugin {
 
     // Map for setting player backpacks (kind of like active storage compared to yml file)
     private final Map<UUID, Inventory> backpackMap = new HashMap<>();
+    private final int defaultBackpackSize = getConfig().getInt("default-backpack-size");
 
     @Override
     public void onEnable() {
 
         // Registering commands
         getCommand("backpack").setExecutor(new BackpackCommand(this));
+        getCommand("seebackpack").setExecutor(new SeebackpackCommand(this));
 
         // Registering Event Listeners
         getServer().getPluginManager().registerEvents(new BackpackListener(this), this);
@@ -52,6 +55,8 @@ public final class Backpacks extends JavaPlugin {
         return backpackMap;
     }
 
+    public int getDefaultBackpackSize() { return defaultBackpackSize; }
+
     // public method to load backpack inventory of specified player using UUID
     public Inventory loadBackpack (UUID playerUUID) {
         // Get the file (config file) and return null if it doesn't exist
@@ -67,7 +72,7 @@ public final class Backpacks extends JavaPlugin {
 
         // Create an inventory object for the player to see their backpack and set the contents of the backpack
         // Then add that to the backpackMap
-        Inventory inventory = Bukkit.createInventory(null, 27, "Backpack");
+        Inventory inventory = Bukkit.createInventory(null, 27, getServer().getPlayer(playerUUID).getDisplayName() + "'s Backpack");
         inventory.setContents(items.toArray(new ItemStack[0]));
         backpackMap.put(playerUUID, inventory);
 

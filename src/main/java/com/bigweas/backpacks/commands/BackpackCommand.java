@@ -41,7 +41,7 @@ public class BackpackCommand implements CommandExecutor {
 
         // If their backpack does not exist, create a new backpack and store it
         if (backpack == null) {
-            backpack = plugin.getServer().createInventory(null, 27, "Backpack");
+            backpack = plugin.getServer().createInventory(null, plugin.getDefaultBackpackSize(), "Backpack");
             plugin.getBackpackMap().put(playerUUID, backpack);
         }
 

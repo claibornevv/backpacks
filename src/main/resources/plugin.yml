@@ -10,13 +10,23 @@ commands:
   backpack:
     description: access your backpack to store or collect items
     usage: /<command>
-    permission: backpack.backpack
+    permission: backpacks.backpack
     aliases:
       - bp
       - pack
       - sack
+  seebackpack:
+    description: access the backpack of a target player
+    usage: /<command> <playername>
+    permission: backpacks.seebackpack
+    aliases:
+      - sb
+      - backpacksee
 permissions:
-  backpack.backpack:
+  backpacks.backpack:
     description: allows players to use a backpack
     default: true
+  backpacks.seebackpack:
+    description: allows a player to see the backpack of others
+    default: op
 
