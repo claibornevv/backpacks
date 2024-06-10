@@ -46,7 +46,7 @@ public class BackpackListener implements Listener {
 
         if (plugin.loadBackpack(playerUUID) == null) {
             plugin.getLogger().info("Creating new backpack for " + playerUUID);
-            Inventory backpack = Bukkit.createInventory(new BackpackHolder(null), 27, player.getDisplayName() + "'s Backpack");
+            Inventory backpack = Bukkit.createInventory(new BackpackHolder(null), plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
             plugin.saveBackpack(playerUUID, backpack);
         }
     }

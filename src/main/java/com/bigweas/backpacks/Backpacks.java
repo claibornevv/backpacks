@@ -3,6 +3,7 @@ package com.bigweas.backpacks;
 // Importing classes for registering commands and listeners
 import com.bigweas.backpacks.commands.BackpackCommand;
 import com.bigweas.backpacks.commands.SeebackpackCommand;
+import com.bigweas.backpacks.commands.SetDefaultBackpackSizeCommand;
 import com.bigweas.backpacks.inventories.BackpackHolder;
 import com.bigweas.backpacks.listeners.BackpackListener;
 
@@ -21,16 +22,16 @@ import java.util.UUID;
 
 public final class Backpacks extends JavaPlugin {
 
-    // Map for setting player backpacks (kind of like active storage compared to yml file)
-    //private final Map<UUID, Inventory> backpackMap = new HashMap<>();
-    private final int defaultBackpackSize = getConfig().getInt("default-backpack-size");
-
     @Override
     public void onEnable() {
+
+        // Saves the config file that is established
+        saveDefaultConfig();
 
         // Registering commands
         getCommand("backpack").setExecutor(new BackpackCommand(this));
         getCommand("seebackpack").setExecutor(new SeebackpackCommand(this));
+        getCommand("setdefaultbackpacksize").setExecutor(new SetDefaultBackpackSizeCommand(this));
 
         // Registering Event Listeners
         getServer().getPluginManager().registerEvents(new BackpackListener(this), this);
@@ -46,7 +47,7 @@ public final class Backpacks extends JavaPlugin {
     @Override
     public void onDisable() {}
 
-    public int getDefaultBackpackSize() { return defaultBackpackSize; }
+    public int getDefaultBackpackSize() { return getConfig().getInt("default-backpack-size"); }
 
     // public method to load backpack inventory of specified player using UUID
     public Inventory loadBackpack (UUID playerUUID) {
@@ -58,11 +59,12 @@ public final class Backpacks extends JavaPlugin {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         // Create a list of ItemStack objects and return null if the list is empty
-        List<ItemStack> items = (List<ItemStack>) config.getList(playerUUID.toString());
+        List<ItemStack> items = (List<ItemStack>) config.getList(playerUUID.toString() + ".contents");
+        int backpackSize = config.getInt(playerUUID.toString() + ".size", getDefaultBackpackSize());
         if (items == null) return null;
 
         // Create an inventory object for the player to see their backpack and set the contents of the backpack
-        Inventory inventory = Bukkit.createInventory(new BackpackHolder(null), 27, getServer().getPlayer(playerUUID).getDisplayName() + "'s Backpack");
+        Inventory inventory = Bukkit.createInventory(new BackpackHolder(null), backpackSize, getServer().getPlayer(playerUUID).getDisplayName() + "'s Backpack");
         inventory.setContents(items.toArray(new ItemStack[0]));
 
         // Return the inventory
@@ -82,7 +84,8 @@ public final class Backpacks extends JavaPlugin {
         }
 
         YamlConfiguration config = new YamlConfiguration().loadConfiguration(file);
-        config.set(playerUUID.toString(), inventory.getContents());
+        config.set(playerUUID.toString() + ".contents", inventory.getContents());
+        config.set(playerUUID.toString() + ".size", inventory.getSize());
 
         try {
             config.save(file);

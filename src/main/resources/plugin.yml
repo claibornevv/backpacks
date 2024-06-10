@@ -22,11 +22,18 @@ commands:
     aliases:
       - sb
       - backpacksee
+  setdefaultbackpacksize:
+    description: edits the config to change the default backpack size
+    usage: /<command> <size>
+    permission: backpacks.setdefaultbackpacksize
 permissions:
   backpacks.backpack:
     description: allows players to use a backpack
     default: true
   backpacks.seebackpack:
     description: allows a player to see the backpack of others
+    default: op
+  backpacks.setdefaultbackpacksize:
+    description: allows a player to set the default size of backpacks
     default: op
 

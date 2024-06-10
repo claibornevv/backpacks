@@ -26,7 +26,7 @@ public class BackpackCommand implements CommandExecutor {
 
     // Backpack command itself with all it's functionality
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] strings) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         // Check to make sure the person running the command is not a player
         // If command block or console, do not run rest of code
