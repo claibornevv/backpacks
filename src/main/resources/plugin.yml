@@ -7,17 +7,6 @@ authors: [BigWeas]
 description: a simple backpack plugin
 website: bigweas.com
 commands:
-  god:
-    description: toggle god mode (invincible)
-    permission: backpack.god
-    usage: /<command>
-    aliases:
-      - godmode
-      - pro
-  feed:
-    description: feeds player to full hunger bars
-    usage: /<command>
-    permission: backpack.feed
   backpack:
     description: access your backpack to store or collect items
     usage: /<command>
@@ -27,12 +16,6 @@ commands:
       - pack
       - sack
 permissions:
-  backpack.god:
-    description: allows player to toggle god mode
-    default: op
-  backpack.feed:
-    description: allows player to fill hunger bars immediately
-    default: true
   backpack.backpack:
     description: allows players to use a backpack
     default: true

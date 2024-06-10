@@ -1,6 +1,9 @@
 package com.bigweas.backpacks.listeners;
 
+// Getting the backpack plugin
 import com.bigweas.backpacks.Backpacks;
+
+// Bukkit classes
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,18 +11,22 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+// Java default classes
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
 public class BackpackListener implements Listener {
 
+    // Create object of plugin
     private final Backpacks plugin;
 
+    // Set the object of plugin in the constructor
     public BackpackListener(Backpacks plugin) {
         this.plugin = plugin;
     }
 
+    // Event handler for saving backpack when the backpack inventory is closed
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
@@ -31,6 +38,7 @@ public class BackpackListener implements Listener {
         }
     }
 
+    // Save the backpack to the config file
     private void saveBackpack(UUID playerUUID, Inventory inventory) {
         File file = new File(plugin.getDataFolder(), "backpacks.yml");
 
