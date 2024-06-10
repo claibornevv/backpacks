@@ -4,16 +4,16 @@ package com.bigweas.backpacks.listeners;
 import com.bigweas.backpacks.Backpacks;
 
 // Bukkit classes
+import com.bigweas.backpacks.inventories.BackpackHolder;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 // Java default classes
-import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 
 public class BackpackListener implements Listener {
@@ -29,35 +29,25 @@ public class BackpackListener implements Listener {
     // Event handler for saving backpack when the backpack inventory is closed
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        Player player = (Player) event.getPlayer();
-        UUID playerUUID = player.getUniqueId();
         Inventory inventory = event.getInventory();
 
-        if (plugin.getBackpackMap().containsKey(playerUUID) && plugin.getBackpackMap().get(playerUUID).equals(inventory)) {
-            saveBackpack(playerUUID, inventory);
+        if (inventory.getHolder() instanceof BackpackHolder) {
+            Player player = (Player) event.getPlayer();
+            UUID playerUUID = player.getUniqueId();
+            plugin.getLogger().info("Inventory closed, saving player inventory of" + playerUUID);
+            plugin.saveBackpack(playerUUID, inventory);
         }
     }
 
-    // Save the backpack to the config file
-    private void saveBackpack(UUID playerUUID, Inventory inventory) {
-        File file = new File(plugin.getDataFolder(), "backpacks.yml");
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        UUID playerUUID = player.getUniqueId();
 
-        if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        YamlConfiguration config = new YamlConfiguration().loadConfiguration(file);
-        config.set(playerUUID.toString(), inventory.getContents());
-
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (plugin.loadBackpack(playerUUID) == null) {
+            plugin.getLogger().info("Creating new backpack for " + playerUUID);
+            Inventory backpack = Bukkit.createInventory(new BackpackHolder(null), 27, player.getDisplayName() + "'s Backpack");
+            plugin.saveBackpack(playerUUID, backpack);
         }
     }
 

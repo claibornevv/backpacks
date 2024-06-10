@@ -4,6 +4,7 @@ package com.bigweas.backpacks.commands;
 import com.bigweas.backpacks.Backpacks;
 
 // Bukkit classes
+import com.bigweas.backpacks.inventories.BackpackHolder;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,8 +42,8 @@ public class BackpackCommand implements CommandExecutor {
 
         // If their backpack does not exist, create a new backpack and store it
         if (backpack == null) {
-            backpack = plugin.getServer().createInventory(null, plugin.getDefaultBackpackSize(), "Backpack");
-            plugin.getBackpackMap().put(playerUUID, backpack);
+            backpack = plugin.getServer().createInventory(new BackpackHolder(null), plugin.getDefaultBackpackSize(), "Backpack");
+            plugin.saveBackpack(playerUUID, backpack);
         }
 
         // Open the backpack up to the player
