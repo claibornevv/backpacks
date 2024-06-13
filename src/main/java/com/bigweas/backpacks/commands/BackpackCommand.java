@@ -1,6 +1,6 @@
 package com.bigweas.backpacks.commands;
 
-// Bring in the Backpacks class
+// Bring in the Backpacks main class
 import com.bigweas.backpacks.Backpacks;
 
 // Bukkit classes
@@ -30,19 +30,19 @@ public class BackpackCommand implements CommandExecutor {
 
         // Check to make sure the person running the command is not a player
         // If command block or console, do not run rest of code
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("This command can only be used by players");
             return true;
         }
 
         // Get important player information and their backpack if it exists
-        Player player = (Player) sender;
         UUID playerUUID = player.getUniqueId();
         Inventory backpack = plugin.loadBackpack(playerUUID);
 
         // If their backpack does not exist, create a new backpack and store it
         if (backpack == null) {
-            backpack = plugin.getServer().createInventory(new BackpackHolder(null), plugin.getDefaultBackpackSize(), "Backpack");
+            backpack = plugin.getServer().createInventory(new BackpackHolder(null),
+                    plugin.getDefaultBackpackSize(), "Backpack");
             plugin.saveBackpack(playerUUID, backpack);
         }
 

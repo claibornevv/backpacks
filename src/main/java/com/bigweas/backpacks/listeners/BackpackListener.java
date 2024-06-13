@@ -29,24 +29,33 @@ public class BackpackListener implements Listener {
     // Event handler for saving backpack when the backpack inventory is closed
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
+        // Get the inventory for the listener
         Inventory inventory = event.getInventory();
 
+        // Make sure that the inventory being listened to is only a backpack and nothing else
         if (inventory.getHolder() instanceof BackpackHolder) {
+            // If it is a backpack, get relevant player information
             Player player = (Player) event.getPlayer();
             UUID playerUUID = player.getUniqueId();
-            plugin.getLogger().info("Inventory closed, saving player inventory of" + playerUUID);
+
+            // Save the backpack to the backpacks.yml file using helper function in Backpacks.java
             plugin.saveBackpack(playerUUID, inventory);
         }
     }
 
+    // Listener for when players join the server and creates a backpack for them if it is their first time joining
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        // Get relevant player information
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
+        // Try loading the backpack and if it returns null, create a new backpack
         if (plugin.loadBackpack(playerUUID) == null) {
-            plugin.getLogger().info("Creating new backpack for " + playerUUID);
-            Inventory backpack = Bukkit.createInventory(new BackpackHolder(null), plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
+            // Create the backpack
+            Inventory backpack = Bukkit.createInventory(new BackpackHolder(null),
+                    plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
+            // Save the backpack
             plugin.saveBackpack(playerUUID, backpack);
         }
     }
