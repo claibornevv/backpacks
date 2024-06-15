@@ -1,11 +1,19 @@
+/**
+ * This is the main class for the Backpacks plugin
+ * This class includes helper functions for other classes in the plugin
+ * Most classes are documented using comments and Javadoc
+ *
+ * @author BigWeas
+ * @version 1.0
+ * @since 2024-06-10
+ */
+
 package com.bigweas.backpacks;
 
 // Importing classes for registering commands and listeners
-import com.bigweas.backpacks.commands.BackpackCommand;
-import com.bigweas.backpacks.commands.SeebackpackCommand;
-import com.bigweas.backpacks.commands.SetBackpackSizeCommand;
-import com.bigweas.backpacks.commands.SetDefaultBackpackSizeCommand;
+import com.bigweas.backpacks.commands.*;
 import com.bigweas.backpacks.inventories.BackpackHolder;
+// Backpack holder custom class (this is for telling a backpack inventory apart from other inventories)
 import com.bigweas.backpacks.listeners.BackpackListener;
 
 // Bukkit imports
@@ -34,6 +42,7 @@ public final class Backpacks extends JavaPlugin {
         getCommand("seebackpack").setExecutor(new SeebackpackCommand(this));
         getCommand("setdefaultbackpacksize").setExecutor(new SetDefaultBackpackSizeCommand(this));
         getCommand("setbackpacksize").setExecutor(new SetBackpackSizeCommand(this));
+        getCommand("resetbackpack").setExecutor(new ResetBackpackCommand(this));
 
         // Registering Event Listeners
         getServer().getPluginManager().registerEvents(new BackpackListener(this), this);
@@ -52,11 +61,24 @@ public final class Backpacks extends JavaPlugin {
     // Getter method for getting the default backpack size from config.yml
     public int getDefaultBackpackSize() { return getConfig().getInt("default-backpack-size"); }
 
-    // Checker method to make sure that the size being used is appropriate for a backpack
-    // Must be a multiple of 9 and less than 54
+
+    /**
+     * Checker method to make sure that the size being used is appropriate for a backpack
+     * Must be a multiple of 9 and less than 54
+     *
+     * @param size size of backpack to be checked
+     * @return true or false depending on whether the input size is a multiple of 9 and less than 55
+     */
     public boolean checkCorrectBackpackSize(int size) { return (size <= 54 && size % 9 == 0); }
 
-    // Get the backpack size of a specific player from the backpacks.yml file
+
+
+    /**
+     * Get the backpack size of a specific player from the backpacks.yml file
+     *
+     * @param playerUUID the UUID of a player
+     * @return size of the input player's backpack
+     */
     public int getPlayerBackpackSize(UUID playerUUID) {
         // Get the backpacks.yml file and create file if it doesn't exist
         File file = new File(getDataFolder(), "backpacks.yml");
@@ -76,7 +98,13 @@ public final class Backpacks extends JavaPlugin {
         return config.getInt(playerUUID + ".size");
     }
 
-    // Helper method to set the size of a player's backpack in the playerUUID.size field in the backpacks.yml file
+
+    /**
+     * Helper method to set the size of a player's backpack in the playerUUID.size field in the backpacks.yml file
+     *
+     * @param playerUUID Unique ID of the player
+     * @param size Size of the backpack to be set
+     */
     public void setPlayerBackpackSize(UUID playerUUID, int size) {
         // Get the file
         File file = new File(getDataFolder(), "backpacks.yml");
@@ -102,15 +130,19 @@ public final class Backpacks extends JavaPlugin {
         }
 
         // Move the items into the newly sized ItemStack
+        // TODO: need to rewrite how to check for non-null item and place in a different slot of the item stack
         ItemStack[] adjustedItems = new ItemStack[size];
         for (int i = 0; i < Math.min(size, items.size()); i++) {
-            adjustedItems[i] = items.get(i);
+            if (items.get(i) != null) {
+                adjustedItems[i] = items.get(i);
+            }
         }
 
         // Make sure the config contains the player
         if (config.contains(playerUUID.toString())) {
             // Set the new size field if the player exists
             config.set(playerUUID.toString() + ".size", size);
+            config.set(playerUUID.toString() + ".contents", adjustedItems);
         } else {
             config.set(playerUUID.toString() + ".size", size);
             config.set(playerUUID.toString() + ".contents", new ItemStack[0]);
@@ -125,7 +157,13 @@ public final class Backpacks extends JavaPlugin {
 
     }
 
-    // public method to load backpack inventory of specified player using UUID
+
+    /**
+     * public method to load backpack inventory of specified player using UUID
+     *
+     * @param playerUUID Unique ID of a player
+     * @return Returns the inventory of the specified player and creates an empty one if there's none tied to player
+     */
     public Inventory loadBackpack (UUID playerUUID) {
         // Get the file (config file) and return null if it doesn't exist
         File file = new File(getDataFolder(), "backpacks.yml");
@@ -148,7 +186,13 @@ public final class Backpacks extends JavaPlugin {
         return inventory;
     }
 
-    // Method to save the backpack
+
+    /**
+     * Method to save the backpack
+     *
+     * @param playerUUID Unique ID of player
+     * @param inventory Inventory of a specified player (should be of the same player in the playerUUID parameter
+     */
     public void saveBackpack (UUID playerUUID, Inventory inventory) {
         // Get the file
         File file = new File(getDataFolder(), "backpacks.yml");
@@ -175,6 +219,7 @@ public final class Backpacks extends JavaPlugin {
             e.printStackTrace();
         }
     }
+
 
     // Method to create a backpacks plugin config file (really for storing backpack data)
     private void createBackpacksFile() {

@@ -26,11 +26,20 @@ commands:
     description: edits the config to change the default backpack size
     usage: /<command> <size>
     permission: backpacks.setdefaultbackpacksize
+    aliases:
+      - sdbs
   setbackpacksize:
     description: set the size of your backpack or a target player
     usage: /<command> <player> (optional) <size>
+    permission: backpacks.setbackpacksize
     aliases:
       - sbs
+  resetbackpack:
+    description: reset the backpack to default size and clear inventory
+    usage: /<command>
+    permission: backpacks.resetbackpack
+    aliases:
+      - rbp
 permissions:
   backpacks.backpack:
     description: allows players to use a backpack
@@ -43,5 +52,8 @@ permissions:
     default: op
   backpacks.setbackpacksize:
     description: allows player to adjust the backpack size of their own or others' backpacks
+    default: op
+  backpacks.resetbackpack:
+    description: allows player to reset the backpack to its default size and clear its inventory
     default: op
 
