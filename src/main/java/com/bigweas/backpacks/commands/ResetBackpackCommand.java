@@ -48,7 +48,7 @@ public class ResetBackpackCommand implements CommandExecutor {
                     plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
 
             // If a player argument is given, reset backpack for target player
-            if (args.length > 0 && args.length < 2) {
+            if (args.length == 1) {
 
                 // Get the target player from the argument
                 Player targetPlayer = Bukkit.getPlayer(args[0]);
@@ -61,14 +61,17 @@ public class ResetBackpackCommand implements CommandExecutor {
                 }
 
                 // Reset the backpack for the target player
-                plugin.saveBackpack(targetPlayer.getUniqueId(), resetBackpack);
+                plugin.saveBackpack(targetPlayer.getUniqueId(), resetBackpack, plugin.getStartingBalance());
 
             } else if (args.length == 0) { // If no arguments given, reset backpack for player executing command
 
                 // Save the backpack and send a confirmation message to the player
-                plugin.saveBackpack(playerUUID, resetBackpack);
+                plugin.saveBackpack(playerUUID, resetBackpack, plugin.getStartingBalance());
                 player.sendMessage(ChatColor.GREEN + "Your backpack has been reset!");
 
+            } else {
+                // Throw an error if the player gives an incorrect amount of arguments
+                sender.sendMessage(ChatColor.RED + "Usage: /resetbackpack (optional):<player>");
             }
 
         } else {

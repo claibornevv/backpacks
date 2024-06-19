@@ -12,6 +12,7 @@ package com.bigweas.backpacks;
 
 // Importing classes for registering commands and listeners
 import com.bigweas.backpacks.commands.*;
+import com.bigweas.backpacks.econ.CustomEconomy;
 import com.bigweas.backpacks.inventories.BackpackHolder;
 // Backpack holder custom class (this is for telling a backpack inventory apart from other inventories)
 import com.bigweas.backpacks.listeners.BackpackListener;
@@ -19,9 +20,14 @@ import com.bigweas.backpacks.listeners.BackpackListener;
 // Bukkit imports
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+
+// Vault API
+import net.milkbowl.vault.economy.Economy;
 
 // Java imports
 import java.io.File;
@@ -30,6 +36,9 @@ import java.util.List;
 import java.util.UUID;
 
 public final class Backpacks extends JavaPlugin {
+
+    // Objects for the VaultAPI
+    private static Economy economy = null;
 
     @Override
     public void onEnable() {
@@ -43,12 +52,20 @@ public final class Backpacks extends JavaPlugin {
         getCommand("setdefaultbackpacksize").setExecutor(new SetDefaultBackpackSizeCommand(this));
         getCommand("setbackpacksize").setExecutor(new SetBackpackSizeCommand(this));
         getCommand("resetbackpack").setExecutor(new ResetBackpackCommand(this));
+        getCommand("balance").setExecutor(new BalanceCommand(this));
 
         // Registering Event Listeners
         getServer().getPluginManager().registerEvents(new BackpackListener(this), this);
 
         // Create the backpacks.yml file if it does not exist
         createBackpacksFile();
+
+        // Setting the API connection with Vault economy
+        if (!setupEconomy()) {
+            getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         // Sending log to console that the plugin is ready
         getLogger().info("Backpack plugin has loaded!");
@@ -60,7 +77,8 @@ public final class Backpacks extends JavaPlugin {
 
     // Getter method for getting the default backpack size from config.yml
     public int getDefaultBackpackSize() { return getConfig().getInt("default-backpack-size"); }
-
+    public double getStartingBalance() { return getConfig().getDouble("starting-balance"); }
+    public double getUpgradeCost() { return getConfig().getDouble("backpack-upgrade-price"); }
 
     /**
      * Checker method to make sure that the size being used is appropriate for a backpack
@@ -80,23 +98,20 @@ public final class Backpacks extends JavaPlugin {
      * @return size of the input player's backpack
      */
     public int getPlayerBackpackSize(UUID playerUUID) {
-        // Get the backpacks.yml file and create file if it doesn't exist
-        File file = new File(getDataFolder(), "backpacks.yml");
-        if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         // Load the config file into a YamlConfiguration object
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getBackpacksConfig();
 
         // Return the value in the PlayerUUID.size section of the config
         return config.getInt(playerUUID + ".size");
     }
+
+    public double getPlayerBalance(UUID playerUUID) {
+        YamlConfiguration config = getBackpacksConfig();
+        return config.getDouble(playerUUID + ".balance");
+    }
+
+    // Getters for the Vault API
+    public static Economy getEconomy() { return economy; }
 
 
     /**
@@ -106,19 +121,8 @@ public final class Backpacks extends JavaPlugin {
      * @param size Size of the backpack to be set
      */
     public void setPlayerBackpackSize(UUID playerUUID, int size) {
-        // Get the file
-        File file = new File(getDataFolder(), "backpacks.yml");
-        if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         // Load into YamlConfiguration object
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getBackpacksConfig();
 
         // Get the items
         List<ItemStack> items = (List<ItemStack>) config.getList(playerUUID.toString() + ".contents");
@@ -149,11 +153,7 @@ public final class Backpacks extends JavaPlugin {
         }
 
         // Save the config file
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveBackpacksConfig(config);
 
     }
 
@@ -165,12 +165,8 @@ public final class Backpacks extends JavaPlugin {
      * @return Returns the inventory of the specified player and creates an empty one if there's none tied to player
      */
     public Inventory loadBackpack (UUID playerUUID) {
-        // Get the file (config file) and return null if it doesn't exist
-        File file = new File(getDataFolder(), "backpacks.yml");
-        if (!file.exists()) return null;
-
         // Create the config object
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getBackpacksConfig();
 
         // Create a list of ItemStack objects and return null if the list is empty
         List<ItemStack> items = (List<ItemStack>) config.getList(playerUUID.toString() + ".contents");
@@ -193,35 +189,34 @@ public final class Backpacks extends JavaPlugin {
      * @param playerUUID Unique ID of player
      * @param inventory Inventory of a specified player (should be of the same player in the playerUUID parameter
      */
-    public void saveBackpack (UUID playerUUID, Inventory inventory) {
-        // Get the file
-        File file = new File(getDataFolder(), "backpacks.yml");
-        if (!file.exists()) {
-            try {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void saveBackpack (UUID playerUUID, Inventory inventory, double balance) {
+//        // Get the file
+//        File file = new File(getDataFolder(), "backpacks.yml");
+//        if (!file.exists()) {
+//            try {
+//                file.getParentFile().mkdirs();
+//                file.createNewFile();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         // Create the YamlConfiguration object after getting the file
-        YamlConfiguration config = new YamlConfiguration().loadConfiguration(file);
+        // Old code
+        //YamlConfiguration config = new YamlConfiguration(file);
+        YamlConfiguration config = getBackpacksConfig();
 
         // Set the relevant information like inventory data and backpack size
         config.set(playerUUID.toString() + ".contents", inventory.getContents());
         config.set(playerUUID.toString() + ".size", inventory.getSize());
+        config.set(playerUUID.toString() + ".balance", balance);
 
         // Save the file
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveBackpacksConfig(config);
     }
 
 
-    // Method to create a backpacks plugin config file (really for storing backpack data)
+    // Method to create a backpacks.yml file to store backpack data for all players
     private void createBackpacksFile() {
         // Get the file
         File file = new File(getDataFolder(), "backpacks.yml");
@@ -239,6 +234,55 @@ public final class Backpacks extends JavaPlugin {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    /**
+     * Setup method for the VaultAPI
+     * Checks to see if the Vault plugin is added to the server
+     * @return Returns true if the Vault plugin is added to the server and the Economy exists
+     */
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().severe("Vault plugin not found!");
+            return false;
+        }
+
+        getServer().getServicesManager().register(Economy.class, new CustomEconomy(this), this,
+                ServicePriority.Highest);
+
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            getLogger().severe("No economy provider found!");
+            return false;
+        }
+        economy = rsp.getProvider();
+        getLogger().info("Economy provider found: " + economy.getName());
+        return economy != null;
+    }
+
+    public YamlConfiguration getBackpacksConfig() {
+        File file = new File(getDataFolder(), "backpacks.yml");
+        if (!file.exists()) {
+            try {
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    public void saveBackpacksConfig(YamlConfiguration config) {
+        File file = new File(getDataFolder(), "backpacks.yml");
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

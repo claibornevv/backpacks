@@ -53,6 +53,14 @@ public class SetBackpackSizeCommand implements CommandExecutor {
 
                 // Grab the target player and the backpack size
                 Player targetPlayer = plugin.getServer().getPlayer(args[0]);
+
+                // Make sure the player given exists
+                // If they don't exist, throw an error to the player giving the command
+                if (targetPlayer == null) {
+                    sender.sendMessage(ChatColor.RED + "Player not found");
+                    return true;
+                }
+
                 int newBackpackSize;
                 // Try the extract the number from the argument and throw and error to the player if it is not a number
                 try {

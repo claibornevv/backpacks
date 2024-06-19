@@ -6,6 +6,7 @@ load: STARTUP
 authors: [BigWeas]
 description: a simple backpack plugin
 website: bigweas.com
+depend: [Vault]
 commands:
   backpack:
     description: access your backpack to store or collect items
@@ -40,6 +41,12 @@ commands:
     permission: backpacks.resetbackpack
     aliases:
       - rbp
+  balance:
+    description: See your current balance
+    usage: /<command>
+    permission: backpacks.balance
+    aliases:
+      - bal
 permissions:
   backpacks.backpack:
     description: allows players to use a backpack
@@ -56,4 +63,7 @@ permissions:
   backpacks.resetbackpack:
     description: allows player to reset the backpack to its default size and clear its inventory
     default: op
+  backpacks.balance:
+    description: allows a player to see their current balance
+    default: true
 
