@@ -51,7 +51,6 @@ public final class Backpacks extends JavaPlugin {
         getCommand("seebackpack").setExecutor(new SeebackpackCommand(this));
         getCommand("setdefaultbackpacksize").setExecutor(new SetDefaultBackpackSizeCommand(this));
         getCommand("setbackpacksize").setExecutor(new SetBackpackSizeCommand(this));
-        getCommand("resetbackpack").setExecutor(new ResetBackpackCommand(this));
         getCommand("balance").setExecutor(new BalanceCommand(this));
 
         // Registering Event Listeners
@@ -190,20 +189,7 @@ public final class Backpacks extends JavaPlugin {
      * @param inventory Inventory of a specified player (should be of the same player in the playerUUID parameter
      */
     public void saveBackpack (UUID playerUUID, Inventory inventory, double balance) {
-//        // Get the file
-//        File file = new File(getDataFolder(), "backpacks.yml");
-//        if (!file.exists()) {
-//            try {
-//                file.getParentFile().mkdirs();
-//                file.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         // Create the YamlConfiguration object after getting the file
-        // Old code
-        //YamlConfiguration config = new YamlConfiguration(file);
         YamlConfiguration config = getBackpacksConfig();
 
         // Set the relevant information like inventory data and backpack size
@@ -244,19 +230,24 @@ public final class Backpacks extends JavaPlugin {
      * @return Returns true if the Vault plugin is added to the server and the Economy exists
      */
     private boolean setupEconomy() {
+        // Try to find the Vault plugin jar file in the plugins folder
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             getLogger().severe("Vault plugin not found!");
             return false;
         }
 
+        // Set up the custom economy service for this plugin
         getServer().getServicesManager().register(Economy.class, new CustomEconomy(this), this,
                 ServicePriority.Highest);
 
+        // Get the RegisteredServiceProvider
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        // Make sure rsp is not null
         if (rsp == null) {
             getLogger().severe("No economy provider found!");
             return false;
         }
+        // Get the provider and return true
         economy = rsp.getProvider();
         getLogger().info("Economy provider found: " + economy.getName());
         return economy != null;
@@ -277,8 +268,10 @@ public final class Backpacks extends JavaPlugin {
     }
 
     public void saveBackpacksConfig(YamlConfiguration config) {
+        // Get the backpack.yml file
         File file = new File(getDataFolder(), "backpacks.yml");
 
+        // Save the config object to the file
         try {
             config.save(file);
         } catch (IOException e) {

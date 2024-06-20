@@ -4,26 +4,40 @@ package com.bigweas.backpacks.commands;
 import com.bigweas.backpacks.Backpacks;
 
 // Bukkit classes
+import com.bigweas.backpacks.commands.subcommands.BackpackReset;
+import com.bigweas.backpacks.commands.subcommands.BackpackUpgrade;
 import com.bigweas.backpacks.inventories.BackpackHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 // Default java classes
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class BackpackCommand implements CommandExecutor {
+public class BackpackCommand implements TabExecutor {
 
     // Create object of the plugin
     private final Backpacks plugin;
 
+    // Subcommands
+    private ArrayList<SubCommand> subcommands = new ArrayList<>();
+
+
     // Initialize plugin object in constructor
     public BackpackCommand(Backpacks plugin) {
+        // Initialize instance of the plugin
         this.plugin = plugin;
+
+        // Set the subcommands
+        subcommands.add(new BackpackUpgrade(plugin));
+        subcommands.add(new BackpackReset(plugin));
     }
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -48,40 +62,13 @@ public class BackpackCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "Opening your backpack");
                 player.openInventory(backpack);
 
-            } else if (args.length == 1 && args[0].equals("upgrade")) {
-                // TODO: implement the backpack upgrade feature
-                // This will allow players to upgrade their backpacks using Vault currency
-                // Each time they upgrade their backpack, it adds a row to the backpack
-                // Eventually, there could be a way to upgrade to a second backpack
-                player.sendMessage(ChatColor.YELLOW + "this feature has not been fully implemented yet");
-                // Get the players current balance
-                double playerBalance = plugin.getEconomy().getBalance(player);
-
-                // Make sure their balance is enough to upgrade depending on what's in the config
-                if (playerBalance >= plugin.getUpgradeCost()) {
-                    // Get the size of the player's backpack
-                    int playerBackpackSize = plugin.getPlayerBackpackSize(player.getUniqueId());
-                    // Check to make sure their backpack is upgradable
-                    if (playerBackpackSize > 0 && playerBackpackSize < 54) {
-                        // Load their backpack. This is for saving it once the size changes
-                        Inventory playerBackpack = plugin.loadBackpack(player.getUniqueId());
-                        // Set the new size of the backpack (basically just add 9 to it)
-                        plugin.setPlayerBackpackSize(player.getUniqueId(), playerBackpackSize+9);
-
-                        // Subtract the cost of upgrading the backpack
-                        plugin.getEconomy().withdrawPlayer(player, plugin.getUpgradeCost());
-
-                        // Save the backpack to apply the change
-                        plugin.saveBackpack(player.getUniqueId(),
-                                plugin.loadBackpack(player.getUniqueId()), plugin.getEconomy().getBalance(player));
-
-                        // Send confirmation to the player
-                        player.sendMessage(ChatColor.GREEN + "Your backpack has been upgraded!");
-                    } else {
-                        player.sendMessage(ChatColor.RED + "Your backpack is already maxed out!");
+            } else { // Subcommand logic
+                // Loop through the possible subcommands
+                for (int i = 0; i < getSubcommands().size(); i++) {
+                    // If the argument provided equals a subcommand, execute it
+                    if (args[0].equalsIgnoreCase(getSubcommands().get(i).getName())) {
+                        getSubcommands().get(i).perform(player, args);
                     }
-                } else {
-                    player.sendMessage(ChatColor.RED + "You do not have the funds to upgrade your backpack");
                 }
             }
 
@@ -91,6 +78,25 @@ public class BackpackCommand implements CommandExecutor {
         }
 
         return true;
+    }
+
+
+    public ArrayList<SubCommand> getSubcommands() { return subcommands; }
+
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            ArrayList<String> subcommandsArguments = new ArrayList<>();
+
+            for (int i = 0; i < getSubcommands().size(); i++) {
+                subcommandsArguments.add(getSubcommands().get(i).getName());
+            }
+
+            return subcommandsArguments;
+        }
+
+        return null;
     }
 
 }

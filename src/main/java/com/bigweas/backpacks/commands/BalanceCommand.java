@@ -20,7 +20,9 @@ public class BalanceCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
+        // Make sure only a player is running the command
         if (sender instanceof Player player) {
+            // Send message to player returning their current balance
             player.sendMessage(ChatColor.GREEN + "Your balance is: $" +
                     plugin.getPlayerBalance(player.getUniqueId()));
         }
