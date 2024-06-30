@@ -10,7 +10,10 @@ on:
 jobs:
   build:
 
-    runs-on: [self-hosted, linux, X64]
+    runs-on:
+      - self-hosted
+      - Linux
+      - X64
     permissions:
       contents: read
       packages: write
