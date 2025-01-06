@@ -1,0 +1,18 @@
+name: backpacks
+version: '0.0.0'
+main: org.dutch.backpacks.BackpacksPlugin
+api-version: '1.21'
+authors: [ BigWeas ]
+description: Adds backpacks to Minecraft servers
+commands:
+  backpack:
+    description: Access your backpack to store or collect items
+    usage: /<command>
+    permissions: backpacks.backpack
+    aliases:
+      - bp
+      - pack
+permissions:
+  backpacks.backpack:
+    description: Allows players to use a backpack
+    default: true
