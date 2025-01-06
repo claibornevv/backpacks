@@ -38,7 +38,7 @@ public class BackpackListener implements Listener {
             UUID playerUUID = player.getUniqueId();
 
             // Save the backpack to the backpacks.yml file using helper function in Backpacks.java
-            plugin.saveBackpack(playerUUID, 1, inventory, plugin.getPlayerBalance(playerUUID));
+            plugin.saveBackpack(playerUUID, 1, inventory);
         }
     }
 
@@ -55,7 +55,7 @@ public class BackpackListener implements Listener {
             Inventory backpack = Bukkit.createInventory(new BackpackHolder(null),
                     plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
             // Save the backpack
-            plugin.saveBackpack(playerUUID, 1, backpack, plugin.getStartingBalance());
+            plugin.saveBackpack(playerUUID, 1, backpack);
         }
     }
 

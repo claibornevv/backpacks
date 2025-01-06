@@ -61,7 +61,6 @@ public final class BackpacksPlugin extends JavaPlugin {
 
     // Getter method for getting the default backpack size from config.yml
     public int getDefaultBackpackSize() { return getConfig().getInt("default-backpack-size"); }
-    public double getStartingBalance() { return getConfig().getDouble("starting-balance"); }
 
     /**
      * Checker method to make sure that the size being used is appropriate for a backpack
@@ -199,7 +198,7 @@ public final class BackpacksPlugin extends JavaPlugin {
      * @param playerUUID Unique ID of player
      * @param inventory Inventory of a specified player (should be of the same player in the playerUUID parameter
      */
-    public void saveBackpack (UUID playerUUID, int backpackNumber, Inventory inventory, double balance) {
+    public void saveBackpack (UUID playerUUID, int backpackNumber, Inventory inventory) {
         // Create the YamlConfiguration object after getting the file
         YamlConfiguration config = getBackpacksConfig();
 
