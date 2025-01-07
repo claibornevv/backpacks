@@ -4,10 +4,7 @@ import org.dutch.backpacks.BackpacksPlugin;
 
 // Bukkit classes
 import org.dutch.backpacks.commands.SubCommand;
-import org.dutch.backpacks.commands.backpack.subcommands.BackpackList;
-import org.dutch.backpacks.commands.backpack.subcommands.BackpackReset;
-import org.dutch.backpacks.commands.backpack.subcommands.BackpackUpgrade;
-import org.dutch.backpacks.commands.backpack.subcommands.BackpackOpen;
+import org.dutch.backpacks.commands.backpack.subcommands.*;
 import org.dutch.backpacks.inventories.BackpackHolder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -36,10 +33,8 @@ public class BackpackCommand implements TabExecutor {
         this.plugin = plugin;
 
         // Set the subcommands
-//        subcommands.add(new BackpackUpgrade(plugin));
-//        subcommands.add(new BackpackReset(plugin));
-        subcommands.add(new BackpackOpen(plugin));
-        subcommands.add(new BackpackList(plugin));
+        subcommands.add(new BackpackUpgrade(plugin));
+        subcommands.add(new BackpackReset(plugin));
     }
 
 
@@ -59,7 +54,7 @@ public class BackpackCommand implements TabExecutor {
                 if (backpack == null) {
                     backpack = plugin.getServer().createInventory(new BackpackHolder(null),
                             plugin.getDefaultBackpackSize(), player.getDisplayName() + "'s Backpack");
-                    plugin.saveBackpack(playerUUID, 1, backpack);
+                    plugin.saveBackpack(playerUUID, backpack);
                 }
 
                 // Open the backpack to the player
