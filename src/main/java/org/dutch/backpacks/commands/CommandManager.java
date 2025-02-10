@@ -21,7 +21,7 @@ public class CommandManager implements TabExecutor {
     private void registerCommands() {
         subCommands.put("help", new HelpCommand());
         subCommands.put("give", new GiveCommand(plugin));
-        //subCommands.put("open", new OpenCommand(plugin));
+        subCommands.put("open", new OpenCommand(plugin));
         subCommands.put("upgrade", new UpgradeCommand(plugin));
         subCommands.put("reset", new ResetCommand(plugin));
     }

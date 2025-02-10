@@ -4,3 +4,33 @@ main: org.dutch.backpacks.BackpacksPlugin
 api-version: '1.21'
 authors: [ BigWeas ]
 description: Adds backpacks to Minecraft servers
+commands:
+  bp:
+    description: access your personal backpack
+    usage: /<command>
+    aliases: [backpack]
+    permission: backpacks.use
+    permission-message: "§cYou need the permission backpacks.use to use this command"
+
+permissions:
+  backpacks.use:
+    description: Allows use of basic backpack commands
+    default: true
+    backpacks.admin:
+      description: Full access to backpack admin commands
+      default: op
+      children:
+        backpacks.give: true
+        backpacks.open.others: true
+    backpacks.give:
+      description: Allow giving backpack items to others
+      default: op
+    backpacks.open.others:
+      description: Allow opening other players' backpacks
+      default: op
+    backpacks.bypass:
+      description: Bypass backpack cooldowns and restrictions
+      default: op
+    backpacks.reset.others:
+      description: Allows resetting other players' backpacks
+      default: op
