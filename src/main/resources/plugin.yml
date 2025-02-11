@@ -22,6 +22,8 @@ permissions:
       children:
         backpacks.give: true
         backpacks.open.others: true
+        backpacks.reset.others: true
+        backpacks.bypass: true
     backpacks.give:
       description: Allow giving backpack items to others
       default: op

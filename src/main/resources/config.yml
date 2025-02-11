@@ -1,0 +1,8 @@
+# Default backpack size (in slots)
+default-size: 9
+
+# Cost to upgrade backpack (in experience levels)
+upgrade-cost: 5
+
+# Maximum backpack size (in slots)
+max-size: 54

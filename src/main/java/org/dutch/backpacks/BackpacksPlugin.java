@@ -11,7 +11,13 @@ public final class BackpacksPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.utils = new BackpackUtils(this);
+        saveDefaultConfig();
+
+        int defaultSize = getConfig().getInt("default-size", 9);
+        int upgradeCost = getConfig().getInt("upgrade-cost", 5);
+        int maxSize = getConfig().getInt("max-size", 54);
+
+        this.utils = new BackpackUtils(this, defaultSize, upgradeCost, maxSize);
         getCommand("backpack").setExecutor(new CommandManager(this));
         getServer().getPluginManager().registerEvents(new BackpackListener(this), this);
         getLogger().info("Backpack Plugin has been Enabled!");

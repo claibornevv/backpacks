@@ -23,12 +23,24 @@ public class BackpackUtils {
     private final Plugin plugin;
     private final NamespacedKey backpackKey;
     private final NamespacedKey sizeKey;
+    private final int defaultSize;
+    private final int upgradeCost;
+    private final int maxSize;
 
-    public BackpackUtils(BackpacksPlugin plugin) {
+    public BackpackUtils(BackpacksPlugin plugin, int defaultSize, int upgradeCost, int maxSize) {
         this.plugin = plugin;
         this.backpackKey = new NamespacedKey(plugin, "backpack");
         this.sizeKey = new NamespacedKey(plugin, "backpack-size");
+        this.defaultSize = defaultSize;
+        this.upgradeCost = upgradeCost;
+        this.maxSize = maxSize;
     }
+
+    public int getDefaultSize() { return defaultSize; }
+
+    public int getUpgradeCost() { return upgradeCost; }
+
+    public int getMaxSize() { return maxSize; }
 
     public ItemStack createBackpackItem() {
         ItemStack backpack = new ItemStack(Material.CHEST);
@@ -115,7 +127,7 @@ public class BackpackUtils {
     }
 
     public int getBackpackSize(Player player) {
-        return player.getPersistentDataContainer().getOrDefault(sizeKey, PersistentDataType.INTEGER, 9);
+        return player.getPersistentDataContainer().getOrDefault(sizeKey, PersistentDataType.INTEGER, defaultSize);
     }
 
     public void setBackpackSize(Player player, int size) {
@@ -126,17 +138,17 @@ public class BackpackUtils {
         int currentSize = getBackpackSize(player);
         int newSize = currentSize + 9;
 
-        if (newSize > 54) {
+        if (newSize > maxSize) {
             player.sendMessage("§cYour backpack is already at maximum size!");
             return false;
         }
 
-        if (player.getLevel() < 5) {
-            player.sendMessage("§cYou need at least 5 experience levels to upgrade!");
+        if (player.getLevel() < upgradeCost) {
+            player.sendMessage("§cYou need at least " + upgradeCost + " experience levels to upgrade!");
             return false;
         }
 
-        player.giveExpLevels(-5);
+        player.giveExpLevels(-upgradeCost);
         setBackpackSize(player, newSize);
         return true;
     }
